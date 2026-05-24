@@ -11,11 +11,19 @@ def style_background_home():
                     background: #5865F2 !important;
                 }
 
-                .stApp div[data-testid="stColumn"]{
+                /* Multiple selectors for different Streamlit versions */
+                .stApp div[data-testid="stColumn"],
+                .stApp div[data-testid="stVerticalBlock"] > div[data-testid="stColumn"],
+                .stApp [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
                     background-color:#E0E3FF !important;
                     padding:2.5rem !important;
                     border-radius: 5rem !important;
-                    }
+                }
+
+                /* Ensure column inner content doesn't override bg */
+                .stApp div[data-testid="stColumn"] > div {
+                    background-color: transparent !important;
+                }
         </style>  
 
                 """
@@ -37,10 +45,10 @@ def style_background_dashboard():
             ,unsafe_allow_html=True)
     
 
+
     
 
 def style_base_layout():
-# asdasd
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
@@ -58,14 +66,15 @@ def style_base_layout():
             }
 
             h1 {
-                font-family: 'Montserrat', sans-serif !important;                font-size: 3.5rem !important;
-                line-height:1.1 1important;
+                font-family: 'Montserrat', sans-serif !important;
+                font-size: 3.5rem !important;
+                line-height:1.1 !important;
                 margin-bottom:0rem !important;
             }
                 
 
             h2 {
-                font-family: 'Climate Crisis', sans-serif !important;
+                font-family: 'Montserrat', sans-serif !important;
                 font-size: 2rem !important;
                 line-height:0.9 !important;
                 margin-bottom:0rem !important;
@@ -105,6 +114,13 @@ def style_base_layout():
 
             button:hover{
                 transform :scale(1.05)}
+
+            /* Fix input fields to always be light themed */
+            .stTextInput input {
+                background-color: #f0f0f8 !important;
+                color: #1a1a2e !important;
+            }
+
         </style>  
 
                 """
