@@ -11,11 +11,11 @@ def style_background_home():
                     background: #5865F2 !important;
                 }
 
-                .stApp div[data-testid="stColumn"]{
-                    background-color:#E0E3FF !important;
-                    padding:2.5rem !important;
-                    border-radius: 5rem !important;
-                    }
+                div[data-testid="column"] > div{
+                background-color:#E0E3FF !important;
+                padding:2rem !important;
+                border-radius:3rem !important;
+}
         </style>  
 
                 """
