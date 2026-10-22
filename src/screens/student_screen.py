@@ -137,7 +137,7 @@ def student_screen():
                 st.warning("multiple faces detected. Please ensure only one face is in the frame.")
             else:
                 if detected:
-                    student_id = all_ids[0]
+                    student_id = list(detected.keys())[0]
                     all_students = get_all_students()
                     student = next((s for s in all_students if s['student_id']==student_id), None)
                     if student:
