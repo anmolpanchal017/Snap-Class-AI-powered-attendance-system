@@ -237,20 +237,29 @@ def teacher_tab_attendance_records():
     records = get_attendance_for_teacher(teacher_id)
 
     if not records:
+        st.info("No attendance records found yet.")
         return
 
     data = []
 
     for r in records:
+        subject = r.get('subjects')
+        if not subject:
+            continue
+
         ts = r['timestamp']
 
         data.append({
             "ts_group": ts.split(".")[0] if ts else None,
-            "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N'A",
-            "Subject": r['subjects']['name'],
-            "Subject Code":r['subjects']['subject_code'],
+            "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N/A",
+            "Subject": subject['name'],
+            "Subject Code": subject['subject_code'],
             "is_present": bool(r.get('is_present', False))
         })
+
+    if not data:
+        st.info("No attendance records found yet.")
+        return
 
     df = pd.DataFrame(data)
 
@@ -273,7 +282,6 @@ def teacher_tab_attendance_records():
                   )
     
     st.dataframe(display_df, width='stretch', hide_index=True)
-
 
 
 
