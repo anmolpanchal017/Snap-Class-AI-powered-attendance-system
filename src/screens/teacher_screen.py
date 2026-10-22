@@ -254,6 +254,7 @@ def teacher_tab_attendance_records():
             "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N/A",
             "Subject": subject['name'],
             "Subject Code": subject['subject_code'],
+            "student_id": r.get('student_id'),
             "is_present": bool(r.get('is_present', False))
         })
 
@@ -277,11 +278,62 @@ def teacher_tab_attendance_records():
         + summary['Total_Count'].astype(str) + ' Students'
     )
 
-    display_df = ( summary.sort_values(by='ts_group' ,ascending=False)
-                  [['Time', 'Subject', 'Subject Code', 'Attendance Stats']]
-                  )
-    
+    sessions = summary.sort_values(by='ts_group', ascending=False).reset_index(drop=True)
+
+    display_df = sessions[['Time', 'Subject', 'Subject Code', 'Attendance Stats']]
+
     st.dataframe(display_df, width='stretch', hide_index=True)
+
+    # ---------- Student-wise details ----------
+    st.subheader("Student-wise Details")
+
+    session_labels = [
+        f"{row['Time']} | {row['Subject']} ({row['Subject Code']})"
+        for _, row in sessions.iterrows()
+    ]
+
+    selected_idx = st.selectbox(
+        "Select a session",
+        options=list(range(len(sessions))),
+        format_func=lambda i: session_labels[i]
+    )
+
+    sel = sessions.iloc[selected_idx]
+
+    session_df = df[
+        (df['ts_group'] == sel['ts_group'])
+        & (df['Time'] == sel['Time'])
+        & (df['Subject Code'] == sel['Subject Code'])
+    ]
+
+    student_ids = [int(i) for i in session_df['student_id'].dropna().unique()]
+
+    name_map = {}
+    if student_ids:
+        try:
+            res = supabase.table('students').select('student_id, name').in_('student_id', student_ids).execute()
+            name_map = {int(s['student_id']): s['name'] for s in res.data}
+        except Exception:
+            name_map = {}
+
+    rows = []
+    for _, r in session_df.iterrows():
+        sid = int(r['student_id']) if pd.notna(r['student_id']) else None
+        rows.append({
+            "Student ID": sid,
+            "Name": name_map.get(sid, "Unknown"),
+            "Status": "✅ Present" if r['is_present'] else "❌ Absent",
+            "_p": bool(r['is_present'])
+        })
+
+    details_df = (
+        pd.DataFrame(rows)
+        .sort_values(by=['_p', 'Name'], ascending=[False, True])
+        .drop(columns=['_p'])
+    )
+    details_df['Student ID'] = details_df['Student ID'].astype('Int64')
+
+    st.dataframe(details_df, width='stretch', hide_index=True)
 
 
 
